@@ -6,6 +6,7 @@
 #include "TCanvas.h"
 #include "TGraph.h"
 #include "TLine.h"
+#include "TRootCanvas.h"
 
 using namespace std;
 
@@ -40,11 +41,14 @@ Graph generate_ER(long n, double p) {
 }
 
 void show_graph(const Graph &graph) {
-    TCanvas *canvas = new TCanvas("canvas", "Path", 1200, 800);
+    TCanvas *canvas = new TCanvas("canvas", "Graph", 950, 600);
+    int max_coordinate = 70;
 
     const long n = graph.nodes.size();
     TGraph *agents = new TGraph(n);
 
+    canvas->Range(-2., -2., max_coordinate, max_coordinate);
+    ((TRootCanvas *)canvas->GetCanvasImp())->ShowMenuBar(0);
     agents->SetTitle("Graph");
     agents->SetMarkerColor(9);
     agents->SetMarkerStyle(29);
@@ -60,18 +64,16 @@ void show_graph(const Graph &graph) {
     for (long i = 0; i < n; ++i) {
         for (long j = 0; j < n && i != j; ++j) {
             do {
-                rand1 = rand() % 70;
-                rand2 = rand() % 70;
+                rand1 = rand() % max_coordinate;
+                rand2 = rand() % max_coordinate;
             } while (rand1 == rand2);
 
             agents->SetPoint(i, rand1, rand2);
         }
     }
 
-    agents->Draw("AP");
-
     double x1, y1, x2, y2;
-    TLine *connection;
+    vector<TLine *> connections;
 
     // iterate through all nodes
     for (long i = 0; i < n; ++i) {
@@ -82,14 +84,18 @@ void show_graph(const Graph &graph) {
             agents->GetPoint(graph.edges.at(i).at(j).to, x2, y2);
 
             // draw line between i-th node and j-th node
-            connection = new TLine(x1, y1, x2, y2);
-            connection->Draw("same");
+            connections.push_back(new TLine(x1, y1, x2, y2));
         }
     }
+
+    for (auto line : connections) line->Draw("same");
+    agents->Draw("P, same");
 }
 
 void agents() {
-    Graph ER_graph = generate_ER(100, 0.5);
+    srand(time(NULL));
+
+    Graph ER_graph = generate_ER(10, 0.5);
 
     show_graph(ER_graph);
 }
