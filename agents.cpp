@@ -68,8 +68,10 @@ void show_graph(const Graph &graph) {
         }
     }
 
+    agents->Draw("AP");
+
     double x1, y1, x2, y2;
-    vector<TLine *> connections;
+    TLine *connection;
 
     // iterate through all nodes
     for (long i = 0; i < n; ++i) {
@@ -80,12 +82,10 @@ void show_graph(const Graph &graph) {
             agents->GetPoint(graph.edges.at(i).at(j).to, x2, y2);
 
             // draw line between i-th node and j-th node
-            connections.push_back(new TLine(x1, y1, x2, y2));
+            connection = new TLine(x1, y1, x2, y2);
+            connection->Draw("same");
         }
     }
-
-    agents->Draw("AP");
-    for (auto line : connections) line->Draw("same");
 }
 
 void agents() {
