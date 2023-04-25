@@ -1,3 +1,4 @@
+#include <cmath>
 #include <iostream>
 #include <random>
 #include <vector>
@@ -6,6 +7,7 @@
 #include "TCanvas.h"
 #include "TGraph.h"
 #include "TLine.h"
+#include "TRandom.h"
 #include "TRootCanvas.h"
 
 using namespace std;
@@ -26,7 +28,7 @@ Graph generate_ER(long n, double p) {
     vector<vector<Edge>> edges;
 
     for (long i = 0; i < n; i++) {
-        vector<Edge> neighbors(n);
+        vector<Edge> neighbors;
 
         for (long j = 0; j < n && i != j; j++) {
             if (((double)rand() / (RAND_MAX)) < p) {
@@ -41,13 +43,14 @@ Graph generate_ER(long n, double p) {
 }
 
 void show_graph(const Graph &graph) {
-    TCanvas *canvas = new TCanvas("canvas", "Graph", 950, 600);
-    int max_coordinate = 70;
+    TCanvas *canvas = new TCanvas("canvas", "Graph", 800, 800);
+    int max_coordinate = 10;
 
     const long n = graph.nodes.size();
     TGraph *agents = new TGraph(n);
 
-    canvas->Range(-2., -2., max_coordinate, max_coordinate);
+    canvas->Range(-max_coordinate - 2., -max_coordinate - 2.,
+                  max_coordinate + 2, max_coordinate + 2);
     ((TRootCanvas *)canvas->GetCanvasImp())->ShowMenuBar(0);
     agents->SetTitle("Graph");
     agents->SetMarkerColor(9);
@@ -59,17 +62,13 @@ void show_graph(const Graph &graph) {
     agents->GetXaxis()->SetTickLength(0);
     agents->GetYaxis()->SetTickLength(0);
 
-    long rand1, rand2;
-
+    double rand1, rand2;
     for (long i = 0; i < n; ++i) {
-        for (long j = 0; j < n && i != j; ++j) {
-            do {
-                rand1 = rand() % max_coordinate;
-                rand2 = rand() % max_coordinate;
-            } while (rand1 == rand2);
-
-            agents->SetPoint(i, rand1, rand2);
-        }
+        do {
+            rand1 = sqrt((double)rand() / RAND_MAX) * max_coordinate;
+            rand2 = ((double)rand() / RAND_MAX) * 2 * M_PI;
+        } while (rand1 == rand2);
+        agents->SetPoint(i, rand1 * cos(rand2), rand1 * sin(rand2));
     }
 
     double x1, y1, x2, y2;
@@ -95,7 +94,7 @@ void show_graph(const Graph &graph) {
 void agents() {
     srand(time(NULL));
 
-    Graph ER_graph = generate_ER(10, 0.5);
+    Graph ER_graph = generate_ER(100, 0.3);
 
     show_graph(ER_graph);
 }
