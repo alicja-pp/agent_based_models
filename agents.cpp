@@ -20,8 +20,8 @@ struct Edge {
 enum class Node { SUSCEPTIBLE, INFECTED, RESISTANT };
 
 struct Graph {
-    std::vector<Node> nodes;
-    const std::vector<std::vector<Edge>> edges;
+    vector<Node> nodes;
+    const vector<vector<Edge>> edges;
 };
 
 Graph generate_ER(long n, double p) {
@@ -31,8 +31,8 @@ Graph generate_ER(long n, double p) {
     for (long i = 0; i < n; i++) {
         vector<Edge> neighbors;
 
-        for (long j = 0; j < n && i != j; j++) {
-            if (((double)rand() / (RAND_MAX)) < p) {
+        for (long j = 0; j < n; j++) {
+            if ((double)rand() / RAND_MAX < p && i != j) {
                 neighbors.push_back(Edge{.to = j});
             }
         }
@@ -69,40 +69,42 @@ void simulate_SI(Graph &graph, double beta, long initial_infected) {
     }
 
     // simulate and show
-    TCanvas *si_canvas = new TCanvas("si_canvas", "Graph", 800, 800);
+    TCanvas *si_canvas = new TCanvas("si_canvas", "Graph", 1200, 800);
     TGraph *infected_graph = new TGraph();
     TGraph *susceptible_graph = new TGraph();
 
-    infected_graph->SetTitle("SI;Time ; Number of infected nodes");
-    long step = 0;
-    long infected = initial_infected;
-    int neighbors, rand_neighbor, j;
+    infected_graph->SetTitle("SI;Time;Number of infected nodes");
 
-    cout << "start while" << endl;
-    while (infected < n) {
+    long step = 0;
+
+    int infected = initial_infected;
+    int node_i_neighbors, rand_neighbor, j;
+
+    while (max(infected, infected - 100) < n) {
         infected_graph->SetPoint(step, step, infected);
         susceptible_graph->SetPoint(step, step, n - infected);
 
         // iterate through all nodes
         for (int i = 0; i < n; ++i) {
-            cout << "losowanie sasiada i = " << i << "\n";
-            neighbors = graph.edges.at(i).size();
+            node_i_neighbors = graph.edges.at(i).size();
 
-            if (neighbors == 0) continue;
+            if (node_i_neighbors == 0) {
+                cout << "i = " << i << ", with k = " << node_i_neighbors
+                     << endl;
+                continue;
+            }
 
-            rand_neighbor = rand() % neighbors;
+            rand_neighbor = rand() % node_i_neighbors;
 
             j = graph.edges.at(i).at(rand_neighbor).to;
 
             if (((double)rand() / RAND_MAX) < beta) {
-                if (graph.nodes.at(i) == Node::INFECTED) {
-                    cout << "i zainfekowany"
-                         << "\n";
+                if (graph.nodes.at(i) == Node::INFECTED &&
+                    graph.nodes.at(j) == Node::SUSCEPTIBLE) {
                     graph.nodes.at(j) = Node::INFECTED;
                     infected++;
-                } else if (graph.nodes.at(j) == Node::INFECTED) {
-                    cout << "j zainfekowany"
-                         << "\n";
+                } else if (graph.nodes.at(j) == Node::INFECTED &&
+                           graph.nodes.at(i) == Node::SUSCEPTIBLE) {
                     graph.nodes.at(i) = Node::INFECTED;
                     infected++;
                 }
@@ -110,6 +112,7 @@ void simulate_SI(Graph &graph, double beta, long initial_infected) {
         }
         step++;
     }
+
     infected_graph->Draw();
     susceptible_graph->Draw("same");
 }
@@ -166,8 +169,8 @@ void show_graph(const Graph &graph) {
 void agents() {
     srand(time(NULL));
 
-    Graph ER_graph = generate_ER(100, 0.1);
+    Graph ER_graph = generate_ER(1000, 0.008);
 
-    simulate_SI(ER_graph, 0.08, 1);
+    simulate_SI(ER_graph, 0.05, 1);
     show_graph(ER_graph);
 }
