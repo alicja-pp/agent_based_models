@@ -13,6 +13,9 @@
 #include "TRandom.h"
 #include "TRootCanvas.h"
 #include "TSystem.h"
+#include "mpark/patterns.hpp"
+
+using namespace mpark::patterns;
 using namespace std;
 
 struct Edge {
@@ -80,9 +83,10 @@ Graph generate_BA(int n, int m) {
     return Graph{.nodes = nodes, .adj_list = adj_list};
 }
 
-void simulate_SI(Graph graph, double beta, int initial_infected) {
+void simulate_SI(Graph &graph, double beta, int initial_infected) {
     // starting with some (infected_nr) random infected nodes
     const int N = graph.nodes.size();
+
     for (int i = 0; i < initial_infected; i++)
         graph.nodes.at(i) = Node::INFECTED;
 
@@ -104,7 +108,7 @@ void simulate_SI(Graph graph, double beta, int initial_infected) {
     int infected = initial_infected;
     int node_i_neighbors, rand_neighbor, j;
 
-    while (max(infected, infected - 100) < N) {
+    while (infected < N) {
         infected_graph->SetPoint(step, step, infected);
         susceptible_graph->SetPoint(step, step, N - infected);
 
@@ -140,8 +144,8 @@ void simulate_SI(Graph graph, double beta, int initial_infected) {
     legend->Draw("same");
 }
 
-void simulate_SIR(Graph graph, double beta, double gamma, int initial_infected,
-                  int initial_resitant) {
+void simulate_SIR(Graph &graph, double beta, double gamma,
+                  int initial_infected, int initial_resitant) {
     const int N = graph.nodes.size();
 
     for (int i = 0; i < initial_infected; i++)
@@ -174,14 +178,12 @@ void simulate_SIR(Graph graph, double beta, double gamma, int initial_infected,
     int node_i_neighbors, rand_neighbor, j;
 
     bool should_infect, should_resist;
+    Node *node_i, *node_j;
 
     while (infected > 0) {
-        // cout << N - resistant - infected << ", " << resistant << ", " <<
-        // infected << "\n";
-
-        susceptible_graph->SetPoint(step, step, N - resistant - infected);
-        infected_graph->SetPoint(step, step, infected);
-        resistant_graph->SetPoint(step, step, resistant);
+        susceptible_graph->AddPoint(step, N - resistant - infected);
+        infected_graph->AddPoint(step, infected);
+        resistant_graph->AddPoint(step, resistant);
 
         // iterate through all nodes
         for (int i = 0; i < N; ++i) {
@@ -194,34 +196,49 @@ void simulate_SIR(Graph graph, double beta, double gamma, int initial_infected,
             should_infect = ((double)rand() / RAND_MAX) < beta;
             should_resist = ((double)rand() / RAND_MAX) < gamma;
 
-            if (should_infect && graph.nodes.at(i) == Node::INFECTED &&
-                graph.nodes.at(j) == Node::SUSCEPTIBLE) {
-                graph.nodes.at(j) = Node::INFECTED;
-                infected++;
+            node_i = &graph.nodes.at(i);
+            node_j = &graph.nodes.at(j);
 
-            } else if (should_infect && graph.nodes.at(j) == Node::INFECTED &&
-                       graph.nodes.at(i) == Node::SUSCEPTIBLE) {
-                graph.nodes.at(i) = Node::INFECTED;
-                infected++;
-
-            } else if (should_resist && graph.nodes.at(i) == Node::INFECTED &&
-                       graph.nodes.at(j) == Node::INFECTED) {
-                graph.nodes.at(i) = Node::RESISTANT;
-                infected--;
-                resistant++;
-
-            } else if (should_resist && graph.nodes.at(i) == Node::INFECTED &&
-                       graph.nodes.at(j) == Node::RESISTANT) {
-                graph.nodes.at(i) = Node::RESISTANT;
-                infected--;
-                resistant++;
-
-            } else if (should_resist && graph.nodes.at(j) == Node::INFECTED &&
-                       graph.nodes.at(i) == Node::RESISTANT) {
-                graph.nodes.at(j) = Node::RESISTANT;
-                infected--;
-                resistant++;
-            }
+            match(*node_i, *node_j)(
+                pattern(Node::SUSCEPTIBLE, Node::INFECTED) =
+                    [&, node_i] {
+                        WHEN(should_infect) {
+                            *node_i = Node::INFECTED;
+                            infected++;
+                        };
+                    },
+                pattern(Node::INFECTED, Node::SUSCEPTIBLE) =
+                    [&, node_j] {
+                        WHEN(should_infect) {
+                            *node_j = Node::INFECTED;
+                            infected++;
+                        };
+                    },
+                pattern(Node::INFECTED, Node::INFECTED) =
+                    [&, node_i] {
+                        WHEN(should_resist) {
+                            *node_i = Node::RESISTANT;
+                            resistant++;
+                            infected--;
+                        };
+                    },
+                pattern(Node::INFECTED, Node::RESISTANT) =
+                    [&, node_i] {
+                        WHEN(should_resist) {
+                            *node_i = Node::RESISTANT;
+                            resistant++;
+                            infected--;
+                        };
+                    },
+                pattern(Node::RESISTANT, Node::INFECTED) =
+                    [&, node_j] {
+                        WHEN(should_resist) {
+                            *node_j = Node::RESISTANT;
+                            resistant++;
+                            infected--;
+                        };
+                    },
+                pattern(_, _) = [] {});
         }
 
         step++;
@@ -262,6 +279,7 @@ void show_graph(const Graph &graph) {
             rand1 = sqrt((double)rand() / RAND_MAX) * max_coordinate;
             rand2 = ((double)rand() / RAND_MAX) * 2 * M_PI;
         } while (rand1 == rand2);
+
         agents->SetPoint(i, rand1 * cos(rand2), rand1 * sin(rand2));
     }
 
@@ -288,13 +306,15 @@ void show_graph(const Graph &graph) {
 void agents() {
     srand(time(NULL));
 
-    // Graph ER_graph = generate_ER(1000, 0.008);
-    Graph BA_graph = generate_BA(1000, 3);
+    // Graph ER_graph = generate_ER(100, 0.008);
+    Graph BA_graph = generate_BA(500, 3);
 
     // simulate_SI(ER_graph, 0.05, 1);
-    // simulate_SIR(ER_graph, 0.1, 0.05, 10, 0);
-    simulate_SI(BA_graph, 0.5, 1);
-    simulate_SIR(BA_graph, 0.1, 0.05, 10, 0);
+    // simulate_SIR(ER_graph, 0.05, 0.1, 1, 0);
 
+    simulate_SI(BA_graph, 0.5, 1);
+    simulate_SIR(BA_graph, 0.2, 0.01, 1, 0);
+
+    // show_graph(ER_graph);
     show_graph(BA_graph);
 }
