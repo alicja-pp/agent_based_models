@@ -8,19 +8,17 @@
 #include "TAxis.h"
 #include "TCanvas.h"
 #include "TGraph.h"
+#include "TLegend.h"
 #include "TLine.h"
 #include "TRandom.h"
 #include "TRootCanvas.h"
 #include "TSystem.h"
-
 using namespace std;
 
 struct Edge {
     int to;
 
-    bool operator==(const Edge& other) const {
-        return to == other.to;
-    }
+    bool operator==(const Edge &other) const { return to == other.to; }
 };
 
 typedef vector<Edge> Edges;
@@ -95,8 +93,11 @@ void simulate_SI(Graph graph, double beta, int initial_infected) {
     TCanvas *si_canvas = new TCanvas("si_canvas", "SI model", 1200, 800);
     TGraph *infected_graph = new TGraph();
     TGraph *susceptible_graph = new TGraph();
+    TLegend *legend = new TLegend(0.7, 0.8, 0.85, 0.65);
+    legend->AddEntry(susceptible_graph, "susceptible", "l");
+    legend->AddEntry(infected_graph, "infected", "l");
 
-    infected_graph->SetTitle("SI;Step");
+    infected_graph->SetTitle("SI;Step;Number of nodes");
 
     long step = 0;
 
@@ -131,9 +132,12 @@ void simulate_SI(Graph graph, double beta, int initial_infected) {
         }
         step++;
     }
-
+    infected_graph->SetLineColor(kRed);
     infected_graph->Draw();
+
+    susceptible_graph->SetLineColor(kBlue);
     susceptible_graph->Draw("same");
+    legend->Draw("same");
 }
 
 void simulate_SIR(Graph graph, double beta, double gamma, int initial_infected,
@@ -155,8 +159,12 @@ void simulate_SIR(Graph graph, double beta, double gamma, int initial_infected,
     TGraph *susceptible_graph = new TGraph();
     TGraph *infected_graph = new TGraph();
     TGraph *resistant_graph = new TGraph();
+    TLegend *legend = new TLegend(0.7, 0.8, 0.85, 0.65);
+    legend->AddEntry(susceptible_graph, "susceptible", "l");
+    legend->AddEntry(infected_graph, "infected", "l");
+    legend->AddEntry(resistant_graph, "resistant", "l");
 
-    infected_graph->SetTitle("SIR;Step");
+    susceptible_graph->SetTitle("SIR;Step;Number of nodes");
 
     long step = 0;
 
@@ -168,8 +176,8 @@ void simulate_SIR(Graph graph, double beta, double gamma, int initial_infected,
     bool should_infect, should_resist;
 
     while (infected > 0) {
-        cout << N - resistant - infected << ", " << resistant << ", "
-             << infected << "\n";
+        // cout << N - resistant - infected << ", " << resistant << ", " <<
+        // infected << "\n";
 
         susceptible_graph->SetPoint(step, step, N - resistant - infected);
         infected_graph->SetPoint(step, step, infected);
@@ -219,14 +227,19 @@ void simulate_SIR(Graph graph, double beta, double gamma, int initial_infected,
         step++;
     }
 
+    susceptible_graph->SetLineColor(kBlue);
     susceptible_graph->GetYaxis()->SetRangeUser(0, N);
     susceptible_graph->Draw();
 
+    infected_graph->SetLineColor(kRed);
     infected_graph->GetYaxis()->SetRangeUser(0, N);
     infected_graph->Draw("same");
 
+    resistant_graph->SetLineColor(kGreen);
     resistant_graph->GetYaxis()->SetRangeUser(0, N);
     resistant_graph->Draw("same");
+
+    legend->Draw("same");
 }
 
 void show_graph(const Graph &graph) {
@@ -238,16 +251,10 @@ void show_graph(const Graph &graph) {
 
     canvas->Range(-max_coordinate - 2., -max_coordinate - 2.,
                   max_coordinate + 2, max_coordinate + 2);
-    ((TRootCanvas *)canvas->GetCanvasImp())->ShowMenuBar(0);
     agents->SetTitle("Graph");
     agents->SetMarkerColor(9);
     agents->SetMarkerStyle(29);
     agents->SetMarkerSize(1);
-
-    agents->GetXaxis()->SetLabelSize(0);
-    agents->GetYaxis()->SetLabelSize(0);
-    agents->GetXaxis()->SetTickLength(0);
-    agents->GetYaxis()->SetTickLength(0);
 
     double rand1, rand2;
     for (int i = 0; i < N; ++i) {
@@ -282,11 +289,12 @@ void agents() {
     srand(time(NULL));
 
     // Graph ER_graph = generate_ER(1000, 0.008);
-    Graph BA_graph = generate_BA(100, 3);
+    Graph BA_graph = generate_BA(1000, 3);
 
     // simulate_SI(ER_graph, 0.05, 1);
     // simulate_SIR(ER_graph, 0.1, 0.05, 10, 0);
     simulate_SI(BA_graph, 0.5, 1);
+    simulate_SIR(BA_graph, 0.1, 0.05, 10, 0);
 
     show_graph(BA_graph);
 }
