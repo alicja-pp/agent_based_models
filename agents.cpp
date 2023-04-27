@@ -107,6 +107,8 @@ void simulate_SI(Graph &graph, double beta, int initial_infected) {
 
     int infected = initial_infected;
     int node_i_neighbors, rand_neighbor, j;
+    bool should_infect;
+    Node *node_i, *node_j;
 
     while (infected < N) {
         infected_graph->SetPoint(step, step, infected);
@@ -122,17 +124,27 @@ void simulate_SI(Graph &graph, double beta, int initial_infected) {
 
             j = graph.adj_list.at(i).at(rand_neighbor).to;
 
-            if (((double)rand() / RAND_MAX) < beta) {
-                if (graph.nodes.at(i) == Node::INFECTED &&
-                    graph.nodes.at(j) == Node::SUSCEPTIBLE) {
-                    graph.nodes.at(j) = Node::INFECTED;
-                    infected++;
-                } else if (graph.nodes.at(j) == Node::INFECTED &&
-                           graph.nodes.at(i) == Node::SUSCEPTIBLE) {
-                    graph.nodes.at(i) = Node::INFECTED;
-                    infected++;
-                }
-            }
+            should_infect = ((double)rand() / RAND_MAX) < beta;
+
+            node_i = &graph.nodes.at(i);
+            node_j = &graph.nodes.at(j);
+
+            match(*node_i, *node_j)(
+                pattern(Node::SUSCEPTIBLE, Node::INFECTED) =
+                    [&, node_i] {
+                        WHEN(should_infect) {
+                            *node_i = Node::INFECTED;
+                            infected++;
+                        };
+                    },
+                pattern(Node::INFECTED, Node::SUSCEPTIBLE) =
+                    [&, node_j] {
+                        WHEN(should_infect) {
+                            *node_j = Node::INFECTED;
+                            infected++;
+                        };
+                    },
+                pattern(_, _) = [] {});
         }
         step++;
     }
@@ -144,8 +156,8 @@ void simulate_SI(Graph &graph, double beta, int initial_infected) {
     legend->Draw("same");
 }
 
-void simulate_SIR(Graph &graph, double beta, double gamma,
-                  int initial_infected, int initial_resitant) {
+void simulate_gossip(Graph &graph, double beta, double gamma,
+                     int initial_infected, int initial_resitant) {
     const int N = graph.nodes.size();
 
     for (int i = 0; i < initial_infected; i++)
@@ -159,7 +171,8 @@ void simulate_SIR(Graph &graph, double beta, double gamma,
         graph.nodes.at(i) = Node::SUSCEPTIBLE;
 
     // simulate and show
-    TCanvas *sir_canvas = new TCanvas("sir_canvas", "SIR model", 1200, 800);
+    TCanvas *sir_canvas =
+        new TCanvas("gossip_canvas", "gossip model", 1200, 800);
     TGraph *susceptible_graph = new TGraph();
     TGraph *infected_graph = new TGraph();
     TGraph *resistant_graph = new TGraph();
@@ -168,7 +181,7 @@ void simulate_SIR(Graph &graph, double beta, double gamma,
     legend->AddEntry(infected_graph, "infected", "l");
     legend->AddEntry(resistant_graph, "resistant", "l");
 
-    susceptible_graph->SetTitle("SIR;Step;Number of nodes");
+    susceptible_graph->SetTitle("Gossip;Step;Number of nodes");
 
     long step = 0;
 
@@ -310,10 +323,10 @@ void agents() {
     Graph BA_graph = generate_BA(500, 3);
 
     // simulate_SI(ER_graph, 0.05, 1);
-    // simulate_SIR(ER_graph, 0.05, 0.1, 1, 0);
+    // simulate_gossip(ER_graph, 0.05, 0.1, 1, 0);
 
     simulate_SI(BA_graph, 0.5, 1);
-    simulate_SIR(BA_graph, 0.2, 0.01, 1, 0);
+    simulate_gossip(BA_graph, 0.2, 0.01, 1, 0);
 
     // show_graph(ER_graph);
     show_graph(BA_graph);
