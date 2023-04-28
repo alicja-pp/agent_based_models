@@ -126,9 +126,11 @@ void simulate_SI(Graph &graph, double beta, int initial_infected) {
 
     long step = 0;
 
-    int infected = initial_infected;
-    int node_i_neighbors, rand_neighbor, j;
     bool should_infect;
+    int infected = initial_infected;
+
+    int edges_i, rand_edge;
+
     Node *node_i, *node_j;
 
     while (infected < N) {
@@ -137,18 +139,16 @@ void simulate_SI(Graph &graph, double beta, int initial_infected) {
 
         // iterate through all nodes
         for (int i = 0; i < N; ++i) {
-            node_i_neighbors = graph.adj_list.at(i).size();
+            edges_i = graph.adj_list.at(i).size();
 
-            if (node_i_neighbors == 0) continue;
+            if (edges_i == 0) continue;
 
-            rand_neighbor = rand() % node_i_neighbors;
-
-            j = graph.adj_list.at(i).at(rand_neighbor).to;
+            rand_edge = rand() % edges_i;
 
             should_infect = ((double)rand() / RAND_MAX) < beta;
 
             node_i = &graph.nodes.at(i);
-            node_j = &graph.nodes.at(j);
+            node_j = &graph.nodes.at(graph.adj_list.at(i).at(rand_edge).to);
 
             match(*node_i, *node_j)(
                 pattern(Node::SUSCEPTIBLE, Node::INFECTED) =
