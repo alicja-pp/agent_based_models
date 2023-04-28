@@ -1,8 +1,8 @@
+#include <algorithm>
 #include <cmath>
 #include <cstdlib>
 #include <iostream>
 #include <random>
-#include <set>
 #include <vector>
 
 #include "TAxis.h"
@@ -33,23 +33,23 @@ struct Graph {
     const vector<Edges> adj_list;
 };
 
-Graph generate_ER(int n, double p) {
-    vector<Node> nodes(n);
+Graph generate_ER(int N, double p) {
+    vector<Node> nodes(N);
     vector<Edges> adj_list;
 
     double average_k = 0;
 
-    for (int i = 0; i < n; i++) {
+    for (int i = 0; i < N; i++) {
         Edges edges;
 
-        for (int j = 0; j < n; j++) {
+        for (int j = 0; j < N; j++) {
             if ((double)rand() / RAND_MAX < p && i != j) {
                 edges.push_back(Edge{.to = j});
             }
         }
 
         adj_list.push_back(edges);
-        average_k += (double)edges.size() / n;
+        average_k += (double)edges.size() / N;
         // cout << i << " " << edges.size() << endl;
     }
 
@@ -57,39 +57,50 @@ Graph generate_ER(int n, double p) {
     return Graph{.nodes = nodes, .adj_list = adj_list};
 }
 
-Graph generate_BA(int n, int m) {
+Graph generate_BA(int N, int m) {
     vector<int> node_indices;
-    iota(begin(node_indices), end(node_indices), 0);
-
     vector<Edges> adj_list;
 
-    double average_k = 0;
+    for (int i = 0; i < m; i++) {
+        Edges initial_edges;
+
+        for (int j = i + 1; j < m; j++) {
+            if (i == j) continue;
+
+            initial_edges.push_back(Edge{.to = j});
+            node_indices.push_back(i);
+            node_indices.push_back(j);
+        }
+
+        adj_list.push_back(initial_edges);
+    }
 
     int rand_node_index;
 
-    for (int i = 0; i < n; i++) {
+    for (int i = m; i < N; i++) {
         Edges edges;
 
         for (int k = 0; k < m; k++) {
             Edge edge;
 
             do {
-                rand_node_index = rand() % n;
-                edge.to = rand_node_index;
+                rand_node_index = rand() % node_indices.size();
+                edge.to = node_indices.at(rand_node_index);
 
             } while (find(edges.begin(), edges.end(), edge) != edges.end());
 
             edges.push_back(edge);
-            node_indices.push_back(rand_node_index);
+            node_indices.push_back(i);
+            node_indices.push_back(edge.to);
         }
 
         adj_list.push_back(edges);
-        average_k += (double)edges.size() / n;
     }
 
-    cout << "Średnia liczba połączeń (BA): " << average_k << "\n";
+    cout << "Średnia liczba połączeń (BA): " << (double)node_indices.size() / N
+         << "\n";
 
-    vector<Node> nodes(n);
+    vector<Node> nodes(N);
     return Graph{.nodes = nodes, .adj_list = adj_list};
 }
 
@@ -429,7 +440,7 @@ void agents() {
     srand(time(NULL));
 
     Graph ER_graph = generate_ER(100, 0.05);
-    Graph BA_graph = generate_BA(500, 3);
+    Graph BA_graph = generate_BA(500, 7);
 
     // simulate_SI(ER_graph, 0.05, 1);
     simulate_SIR(ER_graph, 0.2, 0.05, 1, 0);
