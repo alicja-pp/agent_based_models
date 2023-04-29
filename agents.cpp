@@ -31,7 +31,7 @@ int main() {
     // show_graph(ER_graph);
     //  show_graph(BA_graph);
 
-    app.Run(0);
+    app.Run();
 
     return 0;
 }

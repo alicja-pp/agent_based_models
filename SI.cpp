@@ -77,4 +77,6 @@ void simulate_SI(Graph &graph, double beta, int initial_infected) {
     susceptible_graph->SetLineColor(kBlue);
     susceptible_graph->Draw("same");
     legend->Draw("same");
+
+    si_canvas->SaveAs("SI.png");
 }

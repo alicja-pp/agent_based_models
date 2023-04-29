@@ -42,7 +42,7 @@ void simulate_SIR(Graph &graph, double beta, double gamma,
     bool should_infect, should_resist;
     Node *node_i, *node_j;
 
-    while (infected > 0) {
+    while (infected > 0 && step < N * N) {
         susceptible_graph->AddPoint(step, N - resistant - infected);
         infected_graph->AddPoint(step, infected);
         resistant_graph->AddPoint(step, resistant);
@@ -103,4 +103,6 @@ void simulate_SIR(Graph &graph, double beta, double gamma,
     resistant_graph->Draw("same");
 
     legend->Draw("same");
+
+    sir_canvas->SaveAs("SIR.png");
 }

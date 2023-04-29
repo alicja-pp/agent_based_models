@@ -21,7 +21,7 @@ void simulate_gossip(Graph &graph, double beta, double gamma,
         graph.nodes.at(i) = Node::SUSCEPTIBLE;
 
     // simulate and show
-    TCanvas *sir_canvas =
+    TCanvas *gossip_canvas =
         new TCanvas("gossip_canvas", "gossip model", 1200, 800);
     TGraph *susceptible_graph = new TGraph();
     TGraph *infected_graph = new TGraph();
@@ -121,4 +121,6 @@ void simulate_gossip(Graph &graph, double beta, double gamma,
     resistant_graph->Draw("same");
 
     legend->Draw("same");
+
+    gossip_canvas->SaveAs("gossip.png");
 }

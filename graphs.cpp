@@ -121,4 +121,6 @@ void show_graph(const Graph &graph) {
 
     for (auto line : connections) line->Draw("same");
     agents->Draw("P, same");
+
+    canvas->SaveAs("graph.png");
 }
