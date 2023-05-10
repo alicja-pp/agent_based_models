@@ -1,6 +1,6 @@
 CXX=g++
 
-CXXFLAGS=-c -g -std=c++20 -shared -pthread -m64 -I./mpark
+CXXFLAGS=-c -g -std=c++17 -pthread -m64 -I./mpark
 
 all: program
 
