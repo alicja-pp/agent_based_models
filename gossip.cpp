@@ -1,13 +1,11 @@
 #include "gossip.hpp"
 
-#include "graphs.hpp"
-#include "mpark/patterns.hpp"
-
 using namespace mpark::patterns;
 using namespace std;
 
-void simulate_gossip(Graph &graph, double beta, double gamma,
-                     int initial_infected, int initial_resitant) {
+void simulate_gossip(Graph graph, double beta, double gamma,
+                     int initial_infected, int initial_resitant,
+                     ofstream &output_file) {
     const int N = graph.nodes.size();
 
     for (int i = 0; i < initial_infected; i++)
@@ -20,19 +18,6 @@ void simulate_gossip(Graph &graph, double beta, double gamma,
     for (int i = initial_infected + initial_resitant; i < N; i++)
         graph.nodes.at(i) = Node::SUSCEPTIBLE;
 
-    // simulate and show
-    TCanvas *gossip_canvas =
-        new TCanvas("gossip_canvas", "gossip model", 1200, 800);
-    TGraph *susceptible_graph = new TGraph();
-    TGraph *infected_graph = new TGraph();
-    TGraph *resistant_graph = new TGraph();
-    TLegend *legend = new TLegend(0.7, 0.8, 0.85, 0.65);
-    legend->AddEntry(susceptible_graph, "susceptible", "l");
-    legend->AddEntry(infected_graph, "infected", "l");
-    legend->AddEntry(resistant_graph, "resistant", "l");
-
-    susceptible_graph->SetTitle("Gossip;Step;Number of nodes");
-
     long step = 0;
 
     int infected = initial_infected;
@@ -44,11 +29,6 @@ void simulate_gossip(Graph &graph, double beta, double gamma,
     Node *node_i, *node_j;
 
     while (infected > 0) {
-        susceptible_graph->AddPoint(step, N - resistant - infected);
-        infected_graph->AddPoint(step, infected);
-        resistant_graph->AddPoint(step, resistant);
-        cout << step << " " << N - resistant - infected << " " << infected
-             << " " << resistant << "\n";
         // iterate through all nodes
         for (int i = 0; i < N; ++i) {
             node_i_neighbors = graph.adj_list.at(i).size();
@@ -105,22 +85,9 @@ void simulate_gossip(Graph &graph, double beta, double gamma,
                 pattern(_, _) = [] {});
         }
 
+        output_file << step << "," << N - infected - resistant << ","
+                    << infected << "," << resistant << "\n";
+
         step++;
     }
-
-    susceptible_graph->SetLineColor(kBlue);
-    susceptible_graph->GetYaxis()->SetRangeUser(0, N);
-    susceptible_graph->Draw();
-
-    infected_graph->SetLineColor(kRed);
-    infected_graph->GetYaxis()->SetRangeUser(0, N);
-    infected_graph->Draw("same");
-
-    resistant_graph->SetLineColor(kGreen);
-    resistant_graph->GetYaxis()->SetRangeUser(0, N);
-    resistant_graph->Draw("same");
-
-    legend->Draw("same");
-
-    gossip_canvas->SaveAs("gossip.png");
 }

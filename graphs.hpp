@@ -6,13 +6,6 @@
 #include <random>
 #include <vector>
 
-#include "TAxis.h"
-#include "TCanvas.h"
-#include "TGraph.h"
-#include "TLegend.h"
-#include "TLine.h"
-#include "TRandom.h"
-
 struct Edge {
     int to;
 
@@ -30,7 +23,5 @@ struct Graph {
 
 Graph generate_ER(int N, double p);
 Graph generate_BA(int N, int m);
-
-void show_graph(const Graph &graph);
 
 #endif
