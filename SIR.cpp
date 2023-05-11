@@ -27,7 +27,7 @@ void simulate_SIR(Graph graph, double beta, double gamma, int initial_infected,
     bool should_infect, should_resist;
     Node *node_i, *node_j;
 
-    while (infected > 0 && step < N * N) {
+    while (step < 100) {
         // iterate through all nodes
         for (int i = 0; i < N; ++i) {
             node_i_neighbors = graph.adj_list.at(i).size();
@@ -66,8 +66,8 @@ void simulate_SIR(Graph graph, double beta, double gamma, int initial_infected,
             }
         }
 
-        output_file << step << "," << N - infected << "," << infected << ","
-                    << resistant << "\n";
+        output_file << step << "," << N - infected - resistant << ","
+                    << infected << "," << resistant << "\n";
 
         step++;
     }

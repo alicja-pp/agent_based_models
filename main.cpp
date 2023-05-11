@@ -15,9 +15,8 @@ using namespace mpark::patterns;
 using namespace std;
 
 void ER_SI(double p, int N, double beta) {
-    // TODO: beautify with sprintd or something else...
-    string filename = "data/ER-p=" + to_string(p) + "_SI-N=" + to_string(N) +
-                      "-beta=" + to_string(beta) + ".csv";
+    char filename[100];
+    sprintf(filename, "data/ER_SI_p=%.2f_N=%d_B=%.2f.csv", p, N, beta);
 
     ofstream output_file(filename, std::ofstream::app);
 
@@ -38,9 +37,8 @@ void ER_SI(double p, int N, double beta) {
 }
 
 void BA_SI(int m, int N, double beta) {
-    // TODO: beautify with sprintd or something else...
-    string filename = "data/BA-m=" + to_string(m) + "_SI-N=" + to_string(N) +
-                      "-beta=" + to_string(beta) + ".csv";
+    char filename[100];
+    sprintf(filename, "data/BA_SI_m=%.2d_N=%d_B=%.2f.csv", m, N, beta);
 
     ofstream output_file(filename, std::ofstream::app);
 
@@ -61,10 +59,9 @@ void BA_SI(int m, int N, double beta) {
 }
 
 void ER_SIR(double p, int N, double beta, double gamma) {
-    // TODO: beautify with sprintd or something else...
-    string filename = "data/ER-p=" + to_string(p) + "_SIR-N=" + to_string(N) +
-                      "-beta=" + to_string(beta) +
-                      "-gamma=" + to_string(gamma) + ".csv";
+    char filename[100];
+    sprintf(filename, "data/ER_SIR_p=%.2f_N=%d_B=%.2f_g=%.2f.csv", p, N, beta,
+            gamma);
 
     ofstream output_file(filename, std::ofstream::app);
 
@@ -85,10 +82,9 @@ void ER_SIR(double p, int N, double beta, double gamma) {
 }
 
 void BA_SIR(int m, int N, double beta, double gamma) {
-    // TODO: beautify with sprintd or something else...
-    string filename = "data/BA-m=" + to_string(m) + "_SIR-N=" + to_string(N) +
-                      "-beta=" + to_string(beta) +
-                      "-gamma=" + to_string(gamma) + ".csv";
+    char filename[100];
+    sprintf(filename, "data/BA_SIR_m=%.2d_N=%d_B=%.2f_g=%.2f.csv", m, N, beta,
+            gamma);
 
     ofstream output_file(filename, std::ofstream::app);
 
@@ -109,10 +105,9 @@ void BA_SIR(int m, int N, double beta, double gamma) {
 }
 
 void ER_gossip(double p, int N, double beta, double gamma) {
-    // TODO: beautify with sprintd or something else...
-    string filename =
-        "data/ER-p=" + to_string(p) + "_gossip-N=" + to_string(N) +
-        "-beta=" + to_string(beta) + "-gamma=" + to_string(gamma) + ".csv";
+    char filename[100];
+    sprintf(filename, "data/ER_gossip_p=%.2f_N=%d_B=%.2f_g=%.2f.csv", p, N,
+            beta, gamma);
 
     ofstream output_file(filename, std::ofstream::app);
 
@@ -133,10 +128,9 @@ void ER_gossip(double p, int N, double beta, double gamma) {
 }
 
 void BA_gossip(int m, int N, double beta, double gamma) {
-    // TODO: beautify with sprintd or something else...
-    string filename =
-        "data/BA-m=" + to_string(m) + "_gossip-N=" + to_string(N) +
-        "-beta=" + to_string(beta) + "-gamma=" + to_string(gamma) + ".csv";
+    char filename[100];
+    sprintf(filename, "data/BA_gossip_m=%.2d_N=%d_B=%.2f_g=%.2f.csv", m, N,
+            beta, gamma);
 
     ofstream output_file(filename, std::ofstream::app);
 
@@ -170,10 +164,10 @@ int main() {
     ER_SIR(0.05, 1000, 0.2, 0.05);
     ER_SIR(0.05, 1000, 0.05, 0.2);
 
-    // cout << "BA SIR" << endl;
-    // BA_SIR(5, 100, 0.2, 0.2);
-    // BA_SIR(5, 100, 0.2, 0.05);
-    // BA_SIR(5, 100, 0.05, 0.2);
+    cout << "BA SIR" << endl;
+    BA_SIR(5, 100, 0.2, 0.2);
+    BA_SIR(5, 100, 0.2, 0.05);
+    BA_SIR(5, 100, 0.05, 0.2);
 
     cout << "ER gossip" << endl;
     ER_gossip(0.05, 1000, 0.2, 0.2);

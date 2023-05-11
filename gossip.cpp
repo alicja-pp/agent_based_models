@@ -28,7 +28,7 @@ void simulate_gossip(Graph graph, double beta, double gamma,
     bool should_infect, should_resist;
     Node *node_i, *node_j;
 
-    while (infected > 0) {
+    while (step < 100) {
         // iterate through all nodes
         for (int i = 0; i < N; ++i) {
             node_i_neighbors = graph.adj_list.at(i).size();

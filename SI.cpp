@@ -24,7 +24,7 @@ void simulate_SI(Graph graph, double beta, int initial_infected,
 
     Node *node_i, *node_j;
 
-    while (infected < N) {
+    while (step < 100) {
         // iterate through all nodes
         for (int i = 0; i < N; ++i) {
             edges_i = graph.adj_list.at(i).size();
