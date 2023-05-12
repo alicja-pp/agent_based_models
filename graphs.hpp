@@ -23,5 +23,6 @@ struct Graph {
 
 Graph generate_ER(int N, double p);
 Graph generate_BA(int N, int m);
+void show_graph(const Graph &graph, const char *graph_file_name);
 
 #endif

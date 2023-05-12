@@ -1,11 +1,14 @@
 #include "graphs.hpp"
 
+#include <algorithm>
 #include <cstdlib>
 #include <iostream>
 #include <random>
 #include <vector>
-#include <algorithm>
 
+#include "TCanvas.h"
+#include "TGraph.h"
+#include "TLine.h"
 using namespace std;
 
 // generate Erdosa-Benyi graph
@@ -73,7 +76,8 @@ Graph generate_BA(int N, int m) {
         adj_list.push_back(edges);
     }
 
-    // cout << "Średnia liczba połączeń (BA): " << (double)node_indices.size() / N
+    // cout << "Średnia liczba połączeń (BA): " << (double)node_indices.size()
+    // / N
     //      << "\n";
 
     vector<Node> nodes(N);
@@ -81,47 +85,45 @@ Graph generate_BA(int N, int m) {
 }
 
 // draw nad show any graph in a nice way
-// void show_graph(const Graph &graph) {
-//     TCanvas *canvas = new TCanvas("canvas", "Graph", 800, 800);
-//     int max_coordinate = 10;
-//
-//     const int N = graph.nodes.size();
-//     TGraph *agents = new TGraph(N);
-//
-//     canvas->Range(-max_coordinate - 2., -max_coordinate - 2.,
-//                   max_coordinate + 2, max_coordinate + 2);
-//     agents->SetTitle("Graph");
-//     agents->SetMarkerColor(9);
-//     agents->SetMarkerStyle(29);
-//     agents->SetMarkerSize(1);
-//
-//     double rand1, rand2;
-//     for (int i = 0; i < N; ++i) {
-//         do {
-//             rand1 = sqrt((double)rand() / RAND_MAX) * max_coordinate;
-//             rand2 = ((double)rand() / RAND_MAX) * 2 * M_PI;
-//         } while (rand1 == rand2);
-//
-//         agents->SetPoint(i, rand1 * cos(rand2), rand1 * sin(rand2));
-//     }
-//
-//     double x1, y1, x2, y2;
-//     vector<TLine *> connections;
-//     // iterate through all nodes
-//     for (int i = 0; i < N; ++i) {
-//         agents->GetPoint(i, x1, y1);
-//
-//         // iterate through all i-th node's edges
-//         for (int j = 0; j < graph.adj_list.at(i).size(); ++j) {
-//             agents->GetPoint(graph.adj_list.at(i).at(j).to, x2, y2);
-//
-//             // draw line between i-th node and j-th node
-//             connections.push_back(new TLine(x1, y1, x2, y2));
-//         }
-//     }
-//
-//     for (auto line : connections) line->Draw("same");
-//     agents->Draw("P, same");
-//
-//     canvas->SaveAs("graph.png");
-// }
+void show_graph(const Graph &graph, const char *graph_file_name) {
+    TCanvas *canvas = new TCanvas("canvas", "Graph", 800, 800);
+    int max_coordinate = 10;
+
+    const int N = graph.nodes.size();
+    TGraph *agents = new TGraph(N);
+
+    canvas->Range(-max_coordinate - 2., -max_coordinate - 2.,
+                  max_coordinate + 2, max_coordinate + 2);
+    agents->SetTitle("Graph");
+    agents->SetMarkerColor(9);
+    agents->SetMarkerStyle(29);
+    agents->SetMarkerSize(1);
+
+    double R = max_coordinate;
+    double theta = 0;
+    double angle = 2 * M_PI / N;
+    for (int i = 0; i < N; ++i) {
+        agents->SetPoint(i, R * cos(theta), R * sin(theta));
+        theta = theta + angle;
+    }
+
+    double x1, y1, x2, y2;
+    vector<TLine *> connections;
+    // iterate through all nodes
+    for (int i = 0; i < N; ++i) {
+        agents->GetPoint(i, x1, y1);
+
+        // iterate through all i-th node's edges
+        for (int j = 0; j < graph.adj_list.at(i).size(); ++j) {
+            agents->GetPoint(graph.adj_list.at(i).at(j).to, x2, y2);
+
+            // draw line between i-th node and j-th node
+            connections.push_back(new TLine(x1, y1, x2, y2));
+        }
+    }
+
+    for (auto line : connections) line->Draw("same");
+    agents->Draw("P, same");
+
+    canvas->SaveAs(graph_file_name);
+}

@@ -179,5 +179,13 @@ int main() {
     BA_gossip(5, 1000, 0.2, 0.05);
     BA_gossip(5, 1000, 0.05, 0.2);
 
+    Graph ER_graph = generate_ER(50, 0.05);
+    Graph BA_graph = generate_BA(50, 5);
+
+    string er_file_name = "ER.png";
+    string ba_file_name = "BA.png";
+    show_graph(ER_graph, er_file_name.c_str());
+    show_graph(BA_graph, ba_file_name.c_str());
+
     return 0;
 }
