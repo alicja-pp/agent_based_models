@@ -5,8 +5,8 @@
 #include <string>
 #include <vector>
 
-#include "simulations.hpp"
 #include "graphs.hpp"
+#include "simulations.hpp"
 #include "utils.hpp"
 #include "mpark/patterns.hpp"
 
