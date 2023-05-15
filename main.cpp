@@ -5,149 +5,100 @@
 #include <string>
 #include <vector>
 
-#include "SI.hpp"
-#include "SIR.hpp"
-#include "gossip.hpp"
+#include "simulations.hpp"
 #include "graphs.hpp"
+#include "utils.hpp"
 #include "mpark/patterns.hpp"
 
 using namespace mpark::patterns;
 using namespace std;
 
 void ER_SI(double p, int N, double beta) {
-    char filename[100];
-    sprintf(filename, "data/ER_SI_p=%.2f_N=%d_B=%.2f.csv", p, N, beta);
+    auto filename = format("data/ER_SI_p=%.2f_N=%d_B=%.2f.csv", p, N, beta);
 
-    ofstream output_file(filename, std::ofstream::app);
+    save_to_file_repeated(
+        [N, p, beta](ofstream &output_file) {
+            srand(2001);
+            Graph ER_graph = generate_ER(N, p);
 
-    output_file.close();
-    output_file.open(filename, std::ofstream::out | std::ofstream::trunc);
-
-    for (int i = 0; i < 100; i++) {
-        srand(2001);
-
-        Graph ER_graph = generate_ER(N, p);
-
-        srand(time(NULL));
-
-        simulate_SI(ER_graph, beta, 1, output_file);
-    }
-
-    output_file.close();
+            srand(time(NULL));
+            simulate_SI(ER_graph, beta, 1, output_file);
+        },
+        filename);
 }
 
 void BA_SI(int m, int N, double beta) {
-    char filename[100];
-    sprintf(filename, "data/BA_SI_m=%.2d_N=%d_B=%.2f.csv", m, N, beta);
+    auto filename = format("data/BA_SI_m=%.2d_N=%d_B=%.2f.csv", m, N, beta);
 
-    ofstream output_file(filename, std::ofstream::app);
+    save_to_file_repeated(
+        [N, m, beta](ofstream &output_file) {
+            srand(2001);
+            Graph BA_graph = generate_BA(N, m);
 
-    output_file.close();
-    output_file.open(filename, std::ofstream::out | std::ofstream::trunc);
-
-    for (int i = 0; i < 100; i++) {
-        srand(2001);
-
-        Graph BA_graph = generate_BA(N, m);
-
-        srand(time(NULL));
-
-        simulate_SI(BA_graph, beta, 1, output_file);
-    }
-
-    output_file.close();
+            srand(time(NULL));
+            simulate_SI(BA_graph, beta, 1, output_file);
+        },
+        filename);
 }
 
 void ER_SIR(double p, int N, double beta, double gamma) {
-    char filename[100];
-    sprintf(filename, "data/ER_SIR_p=%.2f_N=%d_B=%.2f_g=%.2f.csv", p, N, beta,
-            gamma);
+    auto filename =
+        format("data/ER_SIR_p=%.2f_N=%d_B=%.2f_g=%.2f.csv", p, N, beta, gamma);
 
-    ofstream output_file(filename, std::ofstream::app);
+    save_to_file_repeated(
+        [N, p, beta, gamma](ofstream &output_file) {
+            srand(2001);
+            Graph ER_graph = generate_ER(N, p);
 
-    output_file.close();
-    output_file.open(filename, std::ofstream::out | std::ofstream::trunc);
-
-    for (int i = 0; i < 100; i++) {
-        srand(2001);
-
-        Graph ER_graph = generate_ER(N, p);
-
-        srand(time(NULL));
-
-        simulate_SIR(ER_graph, beta, gamma, 1, 0, output_file);
-    }
-
-    output_file.close();
+            srand(time(NULL));
+            simulate_SIR(ER_graph, beta, gamma, 1, 0, output_file);
+        },
+        filename);
 }
 
 void BA_SIR(int m, int N, double beta, double gamma) {
-    char filename[100];
-    sprintf(filename, "data/BA_SIR_m=%.2d_N=%d_B=%.2f_g=%.2f.csv", m, N, beta,
-            gamma);
+    auto filename =
+        format("data/BA_SIR_m=%.2d_N=%d_B=%.2f_g=%.2f.csv", m, N, beta, gamma);
 
-    ofstream output_file(filename, std::ofstream::app);
+    save_to_file_repeated(
+        [N, m, beta, gamma](ofstream &output_file) {
+            srand(2001);
+            Graph BA_graph = generate_BA(N, m);
 
-    output_file.close();
-    output_file.open(filename, std::ofstream::out | std::ofstream::trunc);
-
-    for (int i = 0; i < 100; i++) {
-        srand(2001);
-
-        Graph BA_graph = generate_BA(N, m);
-
-        srand(time(NULL));
-
-        simulate_SIR(BA_graph, beta, gamma, 1, 0, output_file);
-    }
-
-    output_file.close();
+            srand(time(NULL));
+            simulate_SIR(BA_graph, beta, gamma, 1, 0, output_file);
+        },
+        filename);
 }
 
 void ER_gossip(double p, int N, double beta, double gamma) {
-    char filename[100];
-    sprintf(filename, "data/ER_gossip_p=%.2f_N=%d_B=%.2f_g=%.2f.csv", p, N,
-            beta, gamma);
+    auto filename = format("data/ER_gossip_p=%.2f_N=%d_B=%.2f_g=%.2f.csv", p,
+                           N, beta, gamma);
 
-    ofstream output_file(filename, std::ofstream::app);
+    save_to_file_repeated(
+        [N, p, beta, gamma](ofstream &output_file) {
+            srand(2001);
+            Graph ER_graph = generate_ER(N, p);
 
-    output_file.close();
-    output_file.open(filename, std::ofstream::out | std::ofstream::trunc);
-
-    for (int i = 0; i < 100; i++) {
-        srand(2001);
-
-        Graph ER_graph = generate_ER(N, p);
-
-        srand(time(NULL));
-
-        simulate_gossip(ER_graph, beta, gamma, 1, 0, output_file);
-    }
-
-    output_file.close();
+            srand(time(NULL));
+            simulate_gossip(ER_graph, beta, gamma, 1, 0, output_file);
+        },
+        filename);
 }
 
 void BA_gossip(int m, int N, double beta, double gamma) {
-    char filename[100];
-    sprintf(filename, "data/BA_gossip_m=%.2d_N=%d_B=%.2f_g=%.2f.csv", m, N,
-            beta, gamma);
+    auto filename = format("data/BA_gossip_m=%.2d_N=%d_B=%.2f_g=%.2f.csv", m,
+                           N, beta, gamma);
 
-    ofstream output_file(filename, std::ofstream::app);
+    save_to_file_repeated(
+        [N, m, beta, gamma](ofstream &output_file) {
+            srand(2001);
+            Graph BA_graph = generate_BA(N, m);
 
-    output_file.close();
-    output_file.open(filename, std::ofstream::out | std::ofstream::trunc);
-
-    for (int i = 0; i < 100; i++) {
-        srand(2001);
-
-        Graph BA_graph = generate_BA(N, m);
-
-        srand(time(NULL));
-
-        simulate_gossip(BA_graph, beta, gamma, 1, 0, output_file);
-    }
-
-    output_file.close();
+            srand(time(NULL));
+            simulate_gossip(BA_graph, beta, gamma, 1, 0, output_file);
+        },
+        filename);
 }
 
 int main() {
@@ -182,10 +133,8 @@ int main() {
     Graph ER_graph = generate_ER(50, 0.05);
     Graph BA_graph = generate_BA(50, 5);
 
-    string er_file_name = "ER.png";
-    string ba_file_name = "BA.png";
-    show_graph(ER_graph, er_file_name.c_str());
-    show_graph(BA_graph, ba_file_name.c_str());
+    show_graph(ER_graph, "ER.png");
+    show_graph(BA_graph, "BA.png");
 
     return 0;
 }

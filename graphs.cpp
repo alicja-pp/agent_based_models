@@ -1,14 +1,5 @@
 #include "graphs.hpp"
 
-#include <algorithm>
-#include <cstdlib>
-#include <iostream>
-#include <random>
-#include <vector>
-
-#include "TCanvas.h"
-#include "TGraph.h"
-#include "TLine.h"
 using namespace std;
 
 // generate Erdosa-Benyi graph

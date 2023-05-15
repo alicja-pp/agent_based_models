@@ -1,4 +1,4 @@
-#include "SIR.hpp"
+#include "simulations.hpp"
 
 using namespace mpark::patterns;
 using namespace std;
